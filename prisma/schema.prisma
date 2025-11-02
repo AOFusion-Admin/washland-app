@@ -1,0 +1,368 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("SUPABASE_DATABASE_URL")
+}
+
+enum UserRole {
+  SUPER_ADMIN
+  FRANCHISE_ADMIN
+  STORE_ADMIN
+  RIDER
+  CUSTOMER
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  IN_PROGRESS
+  READY_FOR_PICKUP
+  DELIVERED
+  COMPLETED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  PAUSED
+  CANCELLED
+  EXPIRED
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  password      String
+  firstName     String
+  lastName      String
+  phone         String?
+  role          UserRole  @default(CUSTOMER)
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Customer specific
+  addresses     Address[]
+  orders        Order[]
+  subscriptions Subscription[]
+
+  // Admin associations
+  managedFranchises Franchise[] @relation("FranchiseAdmin")
+  managedStores     Store[]     @relation("StoreAdmin")
+
+  // Rider associations
+  pickupOrders  Order[]     @relation("OrderPickupRider")
+  deliveryOrders Order[]    @relation("OrderDeliveryRider")
+
+  // Referral & loyalty relations
+  referralsSent     Referral[]  @relation("ReferralReferrer")
+  referralReceived  Referral?   @relation("ReferralReferred")
+  loyaltyPoints     LoyaltyPoint[]
+  wallet            Wallet?
+
+  @@map("users")
+}
+
+model Franchise {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  adminId     String
+  admin       User     @relation("FranchiseAdmin", fields: [adminId], references: [id])
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  stores      Store[]
+
+  @@map("franchises")
+}
+
+model Store {
+  id           String    @id @default(cuid())
+  name         String
+  address      String
+  city         String
+  state        String
+  zipCode      String
+  phone        String
+  email        String?
+  franchiseId  String
+  franchise    Franchise @relation(fields: [franchiseId], references: [id])
+  adminId      String
+  admin        User      @relation("StoreAdmin", fields: [adminId], references: [id])
+  isActive     Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  orders       Order[]
+  storeServices StoreService[]
+
+  @@map("stores")
+}
+
+model Address {
+  id         String  @id @default(cuid())
+  userId     String
+  user       User    @relation(fields: [userId], references: [id])
+  title      String  // e.g., "Home", "Office"
+  street     String
+  city       String
+  state      String
+  zipCode    String
+  isDefault  Boolean @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  orders     Order[]
+
+  @@map("addresses")
+}
+
+model Service {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  basePrice   Decimal  @db.Decimal(10, 2)
+  category    String   // e.g., "Dry Cleaning", "Laundry", "Alterations"
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  storeServices StoreService[]
+  orderItems    OrderItem[]
+  subscriptionItems SubscriptionItem[]
+
+  @@map("services")
+}
+
+model StoreService {
+  id        String  @id @default(cuid())
+  storeId   String
+  store     Store   @relation(fields: [storeId], references: [id])
+  serviceId String
+  service   Service @relation(fields: [serviceId], references: [id])
+  price     Decimal @db.Decimal(10, 2)
+  isActive  Boolean @default(true)
+
+  @@unique([storeId, serviceId])
+  @@map("store_services")
+}
+
+model SubscriptionPlan {
+  id            String   @id @default(cuid())
+  name          String
+  description   String?
+  monthlyPrice  Decimal  @db.Decimal(10, 2)
+  discountRate  Decimal  @db.Decimal(5, 2) // percentage discount
+  maxOrders     Int      // max orders per month
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  subscriptions Subscription[]
+  subscriptionItems SubscriptionItem[]
+
+  @@map("subscription_plans")
+}
+
+model SubscriptionItem {
+  id           String           @id @default(cuid())
+  planId       String
+  plan         SubscriptionPlan @relation(fields: [planId], references: [id])
+  serviceId    String
+  service      Service          @relation(fields: [serviceId], references: [id])
+  quantity     Int              // included quantity per month
+  
+  @@unique([planId, serviceId])
+  @@map("subscription_items")
+}
+
+model Subscription {
+  id          String             @id @default(cuid())
+  userId      String
+  user        User               @relation(fields: [userId], references: [id])
+  planId      String
+  plan        SubscriptionPlan   @relation(fields: [planId], references: [id])
+  status      SubscriptionStatus @default(ACTIVE)
+  startDate   DateTime
+  endDate     DateTime?
+  stripeSubscriptionId String? @unique
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
+  @@map("subscriptions")
+}
+
+model Order {
+  id              String        @id @default(cuid())
+  orderNumber     String        @unique
+  userId          String
+  user            User          @relation(fields: [userId], references: [id])
+  storeId         String
+  store           Store         @relation(fields: [storeId], references: [id])
+  addressId       String
+  address         Address       @relation(fields: [addressId], references: [id])
+  status          OrderStatus   @default(PENDING)
+  paymentStatus   PaymentStatus @default(PENDING)
+  totalAmount     Decimal       @db.Decimal(10, 2)
+  pickupDate      DateTime?
+  deliveryDate    DateTime?
+  specialInstructions String?
+  stripePaymentIntentId String?
+  
+  // Rider assignments
+  pickupRiderId   String?
+  pickupRider     User?         @relation("OrderPickupRider", fields: [pickupRiderId], references: [id])
+  deliveryRiderId String?
+  deliveryRider   User?         @relation("OrderDeliveryRider", fields: [deliveryRiderId], references: [id])
+  
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  items           OrderItem[]
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id])
+  serviceId String
+  service   Service @relation(fields: [serviceId], references: [id])
+  quantity  Int
+  price     Decimal @db.Decimal(10, 2)
+  notes     String?
+
+  @@map("order_items")
+}
+
+model HeroContent {
+  id             String   @id @default(cuid())
+  title          String
+  subtitle       String
+  description    String?
+  primaryBtnText String   @default("Book Service Now")
+  primaryBtnLink String   @default("/book-service")
+  secondaryBtnText String @default("Find Stores")
+  secondaryBtnLink String @default("/locations")
+  isActive       Boolean  @default(false)
+  displayOrder   Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  images         HeroImage[]
+  offers         HeroOffer[]
+
+  @@map("hero_content")
+}
+
+model HeroImage {
+  id            String      @id @default(cuid())
+  heroContentId String
+  heroContent   HeroContent @relation(fields: [heroContentId], references: [id], onDelete: Cascade)
+  imageUrl      String
+  altText       String
+  position      String      @default("right") // "left", "right", "center", "background"
+  displayOrder  Int         @default(0)
+  isActive      Boolean     @default(true)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@map("hero_images")
+}
+
+model HeroOffer {
+  id            String      @id @default(cuid())
+  heroContentId String
+  heroContent   HeroContent @relation(fields: [heroContentId], references: [id], onDelete: Cascade)
+  title         String
+  description   String?
+  discountText  String?     // e.g., "50% OFF", "SAVE ₹500"
+  imageUrl      String?
+  linkUrl       String?
+  isActive      Boolean     @default(true)
+  displayOrder  Int         @default(0)
+  expiresAt     DateTime?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@map("hero_offers")
+}
+
+enum ReferralStatus {
+  PENDING
+  REWARDED
+  REVOKED
+}
+
+enum WalletTxType {
+  CREDIT
+  DEBIT
+}
+
+model Referral {
+  id          String         @id @default(cuid())
+  code        String         @unique
+  referrerId  String
+  referrer    User           @relation("ReferralReferrer", fields: [referrerId], references: [id])
+  referredId  String?        @unique
+  referred    User?          @relation("ReferralReferred", fields: [referredId], references: [id])
+  status      ReferralStatus @default(PENDING)
+  createdAt   DateTime       @default(now())
+  rewardedAt  DateTime?
+
+  @@map("referrals")
+}
+
+model LoyaltyPoint {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+  points     Int
+  source     String   // e.g., "ORDER", "REFERRAL", "MANUAL"
+  expiresAt  DateTime?
+  createdAt  DateTime @default(now())
+
+  @@map("loyalty_points")
+}
+
+model Wallet {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id])
+  balance   Decimal  @db.Decimal(10, 2) @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  transactions WalletTransaction[]
+
+  @@map("wallets")
+}
+
+model WalletTransaction {
+  id         String      @id @default(cuid())
+  walletId   String
+  wallet     Wallet      @relation(fields: [walletId], references: [id])
+  type       WalletTxType
+  amount     Decimal     @db.Decimal(10, 2)
+  source     String?     // e.g., "REFERRAL_CREDIT", "ORDER_PAYMENT", "REFUND"
+  metadata   Json?
+  createdAt  DateTime    @default(now())
+
+  @@map("wallet_transactions")
+}

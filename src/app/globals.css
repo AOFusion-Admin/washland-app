@@ -1,0 +1,448 @@
+* {
+  box-sizing: border-box;
+}
+
+:root {
+  --brand-blue: #1e40af;
+  --brand-blue-600: #1e3a8a;
+  --brand-teal: #319197;
+  --brand-pink: #af002d;
+  --brand-warm: #ff7a18;
+  --bg-surface: #f8fafc;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  /* subtle branded background: light surface + more visible glows + faint texture */
+  background-color: var(--bg-surface);
+  background-image: 
+    radial-gradient(circle at 12% 18%, rgba(49,145,151,0.06) 0%, rgba(49,145,151,0.03) 12%, transparent 40%),
+    radial-gradient(circle at 88% 82%, rgba(175,0,45,0.05) 0%, rgba(175,0,45,0.02) 14%, transparent 45%),
+    linear-gradient(135deg, rgba(30,64,175,0.02), rgba(49,145,151,0.01)),
+    /* very subtle dotted texture */
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Ccircle cx='2' cy='2' r='1' fill='%23ffffff' opacity='0.06'/%3E%3C/svg%3E");
+  background-attachment: fixed;
+  color: #111827;
+}
+
+.min-h-screen {
+  min-height: 100vh;
+}
+
+.bg-gradient-to-br {
+  background: linear-gradient(to bottom right, #1e40af, #1e3a8a);
+}
+
+.max-w-7xl {
+  max-width: 80rem;
+}
+
+.mx-auto {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.px-4 {
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+.py-20 {
+  padding-top: 5rem;
+  padding-bottom: 5rem;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.text-4xl {
+  font-size: 2.25rem;
+  line-height: 2.5rem;
+}
+
+.text-6xl {
+  font-size: 3.75rem;
+  line-height: 1;
+}
+
+.font-bold {
+  font-weight: 700;
+}
+
+.text-white {
+  color: white;
+}
+
+.mb-6 {
+  margin-bottom: 1.5rem;
+}
+
+.mb-8 {
+  margin-bottom: 2rem;
+}
+
+.bg-white {
+  background-color: white;
+}
+
+.shadow-sm {
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.flex {
+  display: flex;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.h-16 {
+  height: 4rem;
+}
+
+.text-2xl {
+  font-size: 1.5rem;
+  line-height: 2rem;
+}
+
+.hidden {
+  display: none;
+}
+
+.space-x-8 > * + * {
+  margin-left: 2rem;
+}
+
+.btn-primary {
+  background-color: #1e40af;
+  color: white;
+  font-weight: 500;
+  padding: 0.75rem 2rem;
+  border-radius: 0.5rem;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+  transition: background-color 0.2s;
+}
+
+.btn-primary:hover {
+  background-color: #1e3a8a;
+}
+
+.btn-secondary {
+  background-color: transparent;
+  color: white;
+  border: 1px solid white;
+  font-weight: 500;
+  padding: 0.75rem 2rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+  transition: all 0.2s;
+}
+
+.btn-secondary:hover {
+  background-color: white;
+  color: #1e40af;
+}
+
+.grid {
+  display: grid;
+}
+
+.gap-8 {
+  gap: 2rem;
+}
+
+.py-16 {
+  padding-top: 4rem;
+  padding-bottom: 4rem;
+}
+
+.card {
+  background-color: white;
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+  padding: 1.5rem;
+  transition: all 0.2s ease-in-out;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* Navigation Styles */
+.desktop-nav {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .desktop-nav {
+    display: flex !important;
+  }
+}
+
+.nav-item {
+  transition: all 0.3s ease-in-out;
+}
+
+.nav-item:hover {
+  background-color: rgba(59, 130, 246, 0.9) !important;
+  color: white !important;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+}
+
+.mobile-nav-item {
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  transition: background-color 0.2s;
+}
+
+.mobile-nav-item:hover {
+  background-color: #f3f4f6;
+}
+
+.btn-hover:hover {
+  background-color: #1d4ed8 !important;
+  transform: translateY(-1px);
+}
+
+.btn-secondary-hover:hover {
+  background-color: #1e40af !important;
+  color: white !important;
+}
+
+/* Base utility classes */
+.hidden {
+  display: none;
+}
+
+/* Responsive breakpoints */
+@media (min-width: 768px) {
+  .md\\:flex {
+    display: flex !important;
+  }
+  
+  .md\\:hidden {
+    display: none !important;
+  }
+}
+
+@media (max-width: 767px) {
+  .md\\:flex {
+    display: none !important;
+  }
+  
+  .md\\:hidden {
+    display: block !important;
+  }
+}
+
+.w-16 {
+  width: 4rem;
+}
+
+.h-16 {
+  height: 4rem;
+}
+
+.rounded-full {
+  border-radius: 9999px;
+}
+
+.w-8 {
+  width: 2rem;
+}
+
+.h-8 {
+  height: 2rem;
+}
+
+.text-xl {
+  font-size: 1.25rem;
+  line-height: 1.75rem;
+}
+
+.font-semibold {
+  font-weight: 600;
+}
+
+.mb-2 {
+  margin-bottom: 0.5rem;
+}
+
+.mb-4 {
+  margin-bottom: 1rem;
+}
+
+.text-gray-600 {
+  color: #4b5563;
+}
+
+.flex-col {
+  flex-direction: column;
+}
+
+.gap-4 {
+  gap: 1rem;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.px-8 {
+  padding-left: 2rem;
+  padding-right: 2rem;
+}
+
+.py-3 {
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+}
+
+.text-lg {
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+}
+
+@media (min-width: 640px) {
+  .sm\\:px-6 {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+  
+  .sm\\:flex-row {
+    flex-direction: row;
+  }
+}
+
+@media (min-width: 768px) {
+  .md\\:flex {
+    display: flex;
+  }
+  
+  .md\\:text-6xl {
+    font-size: 3.75rem;
+    line-height: 1;
+  }
+  
+  .md\\:grid-cols-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .lg\\:px-8 {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+/* Smooth scrolling and accessibility improvements */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Focus states for accessibility */
+button:focus,
+a:focus {
+  outline: 2px solid #1e40af;
+  outline-offset: 2px;
+}
+
+/* Loading animations */
+.fade-in {
+  /* keep ready for animation but don't hide by default so content is visible before JS runs */
+  will-change: transform, opacity;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Subtle float used for decorative elements and cards */
+@keyframes floatY {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+  100% { transform: translateY(0); }
+}
+
+/* Slight pop/zoom for hero entrance */
+@keyframes heroPop {
+  from { opacity: 0; transform: translateY(20px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Button micro interactions */
+@keyframes btnPulse {
+  0% { box-shadow: 0 6px 18px rgba(30,64,175,0.08); transform: translateY(0); }
+  50% { box-shadow: 0 12px 28px rgba(30,64,175,0.12); transform: translateY(-2px); }
+  100% { box-shadow: 0 6px 18px rgba(30,64,175,0.08); transform: translateY(0); }
+}
+
+/* Utility animation classes */
+.hero {
+  animation: heroPop 600ms cubic-bezier(.2,.9,.2,1);
+}
+
+.float-slow {
+  animation: floatY 6s ease-in-out infinite;
+}
+
+.btn-animate {
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+.btn-animate:hover {
+  transform: translateY(-3px);
+  animation: none;
+}
+
+.stagger > * {
+  /* subtle offset for staggered children; keep visible by default */
+  transform: translateY(10px);
+}
+
+.in-view {
+  opacity: 1;
+  transform: translateY(0);
+  animation: fadeIn 520ms ease forwards;
+}
+
+.stagger.in-view > * {
+  animation: fadeIn 520ms ease forwards;
+}
+
+/* Responsive improvements */
+@media (max-width: 768px) {
+  h1 {
+    font-size: 2rem !important;
+  }
+  
+  h2 {
+    font-size: 1.75rem !important;
+  }
+  
+  .card {
+    padding: 1rem;
+  }
+}

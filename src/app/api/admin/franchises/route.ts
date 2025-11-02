@@ -1,0 +1,118 @@
+import { NextResponse } from 'next/server'
+import { prisma } from '../../../../../src/lib/prisma'
+import requireAdminHybrid from '../../../../../src/lib/hybrid-auth'
+import { checkUserDuplicates, getDuplicateErrorMessage } from '../../../../../src/lib/user-validation'
+import { UserRole } from '@prisma/client'
+
+export async function GET() {
+  try {
+    console.log('Franchises API called')
+    // For GET requests without request object, use original auth method
+    const auth = await requireAdminHybrid()
+    console.log('Auth result:', auth)
+    
+    if (auth instanceof NextResponse && auth.status === 401) {
+      console.log('Auth failed:', auth)
+      return auth
+    }
+
+    console.log('Fetching franchises from database...')
+    const franchises = await prisma.franchise.findMany({ 
+      include: { 
+        stores: true, 
+        admin: true 
+      } 
+    })
+    
+    console.log('Raw franchises from DB:', franchises.length, 'items')
+    
+    // Transform the data to match frontend interface
+    const transformedFranchises = franchises.map(franchise => ({
+      id: franchise.id,
+      name: franchise.name,
+      description: franchise.description,
+      admin: franchise.admin ? {
+        firstName: franchise.admin.firstName,
+        lastName: franchise.admin.lastName,
+        email: franchise.admin.email
+      } : null,
+      storeCount: franchise.stores.length,
+      isActive: franchise.isActive,
+      createdAt: franchise.createdAt.toISOString()
+    }))
+    
+    console.log('Transformed franchises:', transformedFranchises.length, 'items')
+    return NextResponse.json(transformedFranchises)
+  } catch (err) {
+    console.error('franchises GET error', err)
+    return NextResponse.json({ error: err instanceof Error ? err.message : 'failed' }, { status: 500 })
+  }
+}
+
+export async function POST(req: Request) {
+  try {
+    const auth = await requireAdminHybrid(req)
+    if (auth instanceof NextResponse && auth.status === 401) return auth
+
+    const body = await req.json()
+    const { name, description, adminFirstName, adminLastName, adminEmail, adminPhone } = body
+    if (!name) return NextResponse.json({ error: 'name required' }, { status: 400 })
+    if (!adminFirstName || !adminLastName || !adminEmail) {
+      return NextResponse.json({ error: 'Admin details (first name, last name, email) are required' }, { status: 400 })
+    }
+
+    // Check if admin user already exists
+    let admin = await prisma.user.findUnique({ where: { email: adminEmail } })
+    
+    if (admin) {
+      // User exists, update role to FRANCHISE_ADMIN if needed
+      if (admin.role !== 'FRANCHISE_ADMIN') {
+        admin = await prisma.user.update({
+          where: { id: admin.id },
+          data: { role: 'FRANCHISE_ADMIN' }
+        })
+      }
+    } else {
+      // Check for duplicates before creating new user
+      const duplicateCheck = await checkUserDuplicates(adminEmail, adminPhone)
+      if (duplicateCheck.isDuplicate) {
+        const errorMessage = getDuplicateErrorMessage(duplicateCheck)
+        return NextResponse.json({ 
+          error: errorMessage,
+          field: duplicateCheck.field,
+          type: 'duplicate'
+        }, { status: 400 })
+      }
+
+      // Create new FRANCHISE_ADMIN user
+      admin = await prisma.user.create({ 
+        data: { 
+          email: adminEmail, 
+          password: '', // Admin should set password via onboarding/reset
+          firstName: adminFirstName,
+          lastName: adminLastName,
+          phone: adminPhone || '',
+          role: UserRole.FRANCHISE_ADMIN, 
+          isActive: true 
+        } 
+      })
+    }
+
+    const franchise = await prisma.franchise.create({ 
+      data: { 
+        name, 
+        description: description || '', 
+        adminId: admin.id 
+      },
+      include: {
+        admin: true,
+        stores: true
+      }
+    })
+    
+    return NextResponse.json(franchise)
+  } catch (err) {
+    console.error('franchises POST error', err)
+    return NextResponse.json({ error: err instanceof Error ? err.message : 'failed' }, { status: 500 })
+  }
+}

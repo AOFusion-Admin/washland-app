@@ -1,0 +1,114 @@
+    "use client"
+
+import { useState, useEffect } from 'react'
+import { useSession } from 'next-auth/react'
+
+export const dynamic = 'force-dynamic'
+
+export default function AuthTestPage() {
+  const { data: session } = useSession()
+  const [localRole, setLocalRole] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setLocalRole(localStorage.getItem('userRole'))
+      
+      const handleStorage = () => {
+        setLocalRole(localStorage.getItem('userRole'))
+      }
+      
+      const handleAuthEvent = (e: CustomEvent) => {
+        if (e.detail?.role) {
+          setLocalRole(e.detail.role)
+        }
+      }
+
+      window.addEventListener('storage', handleStorage)
+      window.addEventListener('auth:session', handleAuthEvent as EventListener)
+      
+      return () => {
+        window.removeEventListener('storage', handleStorage)
+        window.removeEventListener('auth:session', handleAuthEvent as EventListener)
+      }
+    }
+  }, [])
+
+  const simulateWashlandLogin = () => {
+    localStorage.setItem('userRole', 'SUPER_ADMIN')
+    localStorage.setItem('userEmail', 'admin@washland.com')
+    
+    window.dispatchEvent(new CustomEvent('auth:session', { 
+      detail: { 
+        role: 'SUPER_ADMIN', 
+        email: 'admin@washland.com',
+        id: 'test-user-id',
+        name: 'Washland Admin'
+      } 
+    }))
+    
+    setLocalRole('SUPER_ADMIN')
+  }
+
+  const clearAuth = () => {
+    localStorage.removeItem('userRole')
+    localStorage.removeItem('userEmail')
+    
+    window.dispatchEvent(new CustomEvent('auth:session', { detail: null }))
+    
+    setLocalRole(null)
+  }
+
+  return (
+    <div style={{ padding: '2rem', maxWidth: '600px', margin: '0 auto' }}>
+      <h1>Authentication Test</h1>
+      
+      <div style={{ marginBottom: '2rem', padding: '1rem', border: '1px solid #ccc', borderRadius: '8px' }}>
+        <h3>Current Auth State:</h3>
+        <p><strong>NextAuth Session:</strong> {session ? 'Yes' : 'No'}</p>
+        <p><strong>Session Role:</strong> {session?.user?.role || 'None'}</p>
+        <p><strong>Session Email:</strong> {session?.user?.email || 'None'}</p>
+        <p><strong>LocalStorage Role:</strong> {localRole || 'None'}</p>
+        <p><strong>LocalStorage Email:</strong> {localStorage.getItem('userEmail') || 'None'}</p>
+      </div>
+
+      <div style={{ marginBottom: '1rem' }}>
+        <button 
+          onClick={simulateWashlandLogin}
+          style={{ 
+            padding: '0.5rem 1rem', 
+            backgroundColor: '#1e40af', 
+            color: 'white', 
+            border: 'none', 
+            borderRadius: '4px',
+            marginRight: '1rem'
+          }}
+        >
+          Simulate Washland Login
+        </button>
+        
+        <button 
+          onClick={clearAuth}
+          style={{ 
+            padding: '0.5rem 1rem', 
+            backgroundColor: '#dc2626', 
+            color: 'white', 
+            border: 'none', 
+            borderRadius: '4px'
+          }}
+        >
+          Clear Auth
+        </button>
+      </div>
+
+      <div style={{ marginTop: '2rem' }}>
+        <h3>Instructions:</h3>
+        <ol>
+          <li>Click "Simulate Washland Login" to set localStorage auth</li>
+          <li>Check if the Header updates to show "Sign Out" and "Dashboard" buttons</li>
+          <li>Click "Clear Auth" to sign out</li>
+          <li>Check if the Header reverts to "Sign In"</li>
+        </ol>
+      </div>
+    </div>
+  )
+}

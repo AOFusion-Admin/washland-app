@@ -1,0 +1,173 @@
+import { NextResponse } from 'next/server'
+import { prisma } from '../../../../../src/lib/prisma'
+import requireAdminHybrid from '../../../../../src/lib/hybrid-auth'
+import { hashPassword } from '../../../../../src/lib/password'
+import { checkUserDuplicates, getDuplicateErrorMessage } from '../../../../../src/lib/user-validation'
+import { UserRole } from '@prisma/client'
+
+export async function GET(req: Request) {
+  try {
+    const auth = await requireAdminHybrid(req)
+    if (auth instanceof NextResponse && auth.status === 401) return auth
+
+    const { searchParams } = new URL(req.url)
+    const franchiseId = searchParams.get('franchiseId')
+
+    const stores = await prisma.store.findMany({
+      where: franchiseId ? { franchiseId } : {},
+      include: { 
+        franchise: true, 
+        admin: true,
+        _count: {
+          select: {
+            orders: true
+          }
+        }
+      },
+      orderBy: { createdAt: 'desc' }
+    })
+    
+    return NextResponse.json(stores)
+  } catch (err) {
+    console.error('stores GET error', err)
+    return NextResponse.json({ error: err instanceof Error ? err.message : 'failed' }, { status: 500 })
+  }
+}
+
+export async function POST(req: Request) {
+  try {
+    const auth = await requireAdminHybrid(req)
+    if (auth instanceof NextResponse && auth.status === 401) return auth
+
+    const body = await req.json()
+    const { 
+      name, 
+      address, 
+      city, 
+      state, 
+      pincode, 
+      phone, 
+      franchiseId,
+      managerFirstName,
+      managerLastName,
+      managerEmail,
+      managerPhone
+    } = body
+
+    // Validate required fields including manager details
+    if (!name || !address || !city || !franchiseId) {
+      return NextResponse.json({ error: 'Name, address, city, and franchise are required' }, { status: 400 })
+    }
+
+    if (!managerFirstName || !managerLastName || !managerEmail || !managerPhone) {
+      return NextResponse.json({ 
+        error: 'Store manager details (first name, last name, email, and phone) are required' 
+      }, { status: 400 })
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(managerEmail)) {
+      return NextResponse.json({ error: 'Invalid email format' }, { status: 400 })
+    }
+
+    // Validate franchise exists
+    const franchise = await prisma.franchise.findUnique({
+      where: { id: franchiseId }
+    })
+    
+    if (!franchise) {
+      return NextResponse.json({ error: 'Franchise not found' }, { status: 404 })
+    }
+
+    let admin = null
+    let isNewAdmin = false
+    
+    // Check if user already exists
+    admin = await prisma.user.findUnique({ where: { email: managerEmail } })
+    
+    if (admin) {
+      // Update existing user to STORE_ADMIN role and update details
+      admin = await prisma.user.update({
+        where: { id: admin.id },
+        data: { 
+          role: UserRole.STORE_ADMIN,
+          firstName: managerFirstName,
+          lastName: managerLastName,
+          phone: managerPhone,
+          isActive: true
+        }
+      })
+    } else {
+      // Check for duplicates before creating new user
+      const duplicateCheck = await checkUserDuplicates(managerEmail, managerPhone)
+      if (duplicateCheck.isDuplicate) {
+        const errorMessage = getDuplicateErrorMessage(duplicateCheck)
+        return NextResponse.json({ 
+          error: errorMessage,
+          field: duplicateCheck.field,
+          type: 'duplicate'
+        }, { status: 400 })
+      }
+
+      // Generate a temporary password for the new admin
+      const tempPassword = Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8)
+      const hashedPassword = await hashPassword(tempPassword)
+      
+      // Create new STORE_ADMIN user
+      admin = await prisma.user.create({
+        data: {
+          email: managerEmail,
+          password: hashedPassword,
+          firstName: managerFirstName,
+          lastName: managerLastName,
+          phone: managerPhone,
+          role: UserRole.STORE_ADMIN,
+          isActive: true
+        }
+      })
+      isNewAdmin = true
+      
+      // TODO: Send email with login credentials to the store manager
+      // This would typically integrate with an email service
+      console.log(`Store admin account created for ${managerEmail}`)
+      console.log(`Temporary password: ${tempPassword}`) // Remove this in production
+    }
+
+    const store = await prisma.store.create({
+      data: {
+        name,
+        address,
+        city,
+        state: state || '',
+        zipCode: pincode || '',
+        phone: phone || '',
+        franchiseId,
+        adminId: admin.id, // Always assign the store admin
+        isActive: true
+      },
+      include: {
+        franchise: true,
+        admin: true,
+        _count: {
+          select: {
+            orders: true
+          }
+        }
+      }
+    })
+
+    // TODO: Send email with login credentials to the store manager
+    // This would typically integrate with an email service
+    console.log(`Store admin account ${isNewAdmin ? 'created' : 'updated'} for ${managerEmail}`)
+
+    return NextResponse.json({
+      store,
+      adminCreated: isNewAdmin,
+      adminEmail: managerEmail
+    })
+  } catch (err) {
+    console.error('stores POST error', err)
+    return NextResponse.json({ error: err instanceof Error ? err.message : 'failed' }, { status: 500 })
+  }
+}

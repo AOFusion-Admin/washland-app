@@ -1,0 +1,48 @@
+<svg width="400" height="300" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="400" height="300" fill="url(#gradient1)"/>
+  
+  <!-- Washing Machine -->
+  <rect x="50" y="80" width="120" height="140" rx="15" fill="#E5E7EB" stroke="#9CA3AF" stroke-width="2"/>
+  <circle cx="110" cy="130" r="35" fill="#F3F4F6" stroke="#6B7280" stroke-width="2"/>
+  <circle cx="110" cy="130" r="25" fill="none" stroke="#3B82F6" stroke-width="2" stroke-dasharray="5,5">
+    <animateTransform attributeName="transform" type="rotate" values="0 110 130;360 110 130" dur="3s" repeatCount="indefinite"/>
+  </circle>
+  
+  <!-- Control Panel -->
+  <rect x="60" y="90" width="100" height="20" rx="10" fill="#374151"/>
+  <circle cx="75" cy="100" r="3" fill="#10B981"/>
+  <circle cx="90" cy="100" r="3" fill="#F59E0B"/>
+  <circle cx="105" cy="100" r="3" fill="#EF4444"/>
+  
+  <!-- Clothes -->
+  <path d="M200 100 Q220 90 240 100 Q250 120 240 140 Q220 150 200 140 Q190 120 200 100 Z" fill="#3B82F6"/>
+  <path d="M220 120 Q240 110 260 120 Q270 140 260 160 Q240 170 220 160 Q210 140 220 120 Z" fill="#EF4444"/>
+  <path d="M240 140 Q260 130 280 140 Q290 160 280 180 Q260 190 240 180 Q230 160 240 140 Z" fill="#10B981"/>
+  
+  <!-- Bubbles -->
+  <circle cx="300" cy="50" r="8" fill="#3B82F6" opacity="0.6">
+    <animate attributeName="cy" values="300;50;300" dur="4s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0;0.6;0" dur="4s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="320" cy="80" r="6" fill="#10B981" opacity="0.4">
+    <animate attributeName="cy" values="300;80;300" dur="5s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0;0.4;0" dur="5s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="280" cy="70" r="5" fill="#F59E0B" opacity="0.5">
+    <animate attributeName="cy" values="300;70;300" dur="3.5s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0;0.5;0" dur="3.5s" repeatCount="indefinite"/>
+  </circle>
+  
+  <!-- Water droplets -->
+  <path d="M350 200 Q355 190 360 200 Q355 210 350 200 Z" fill="#3B82F6">
+    <animateTransform attributeName="transform" type="translate" values="0,0;0,100;0,0" dur="2s" repeatCount="indefinite"/>
+  </path>
+  
+  <defs>
+    <linearGradient id="gradient1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#EBF8FF;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#DBEAFE;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+</svg>
