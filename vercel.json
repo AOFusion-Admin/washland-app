@@ -2,11 +2,6 @@
   "buildCommand": "npm run build",
   "outputDirectory": ".next",
   "framework": "nextjs",
-  "functions": {
-    "src/app/api/**/*.ts": {
-      "runtime": "@vercel/node"
-    }
-  },
   "build": {
     "env": {
       "NODE_OPTIONS": "--max_old_space_size=4096"
