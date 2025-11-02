@@ -190,13 +190,15 @@ export async function GET(req: Request) {
       ])
 
       // Get service names for service breakdown
-      const serviceIds = serviceBreakdown.map(item => item.serviceId)
+      const serviceIds = serviceBreakdown
+        .map((item) => item.serviceId)
+        .filter((id): id is string => id !== null)
       const services = await prisma.service.findMany({
         where: { id: { in: serviceIds } },
         select: { id: true, name: true }
       })
 
-      const enrichedServiceBreakdown = serviceBreakdown.map(item => ({
+      const enrichedServiceBreakdown = serviceBreakdown.map((item) => ({
         ...item,
         serviceName: services.find(s => s.id === item.serviceId)?.name || 'Unknown'
       }))
