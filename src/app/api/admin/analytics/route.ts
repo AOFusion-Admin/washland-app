@@ -191,14 +191,14 @@ export async function GET(req: Request) {
 
       // Get service names for service breakdown
       const serviceIds = serviceBreakdown
-        .map((item) => item.serviceId)
+        .map((item: { serviceId: string | null }) => item.serviceId)
         .filter((id): id is string => id !== null)
       const services = await prisma.service.findMany({
         where: { id: { in: serviceIds } },
         select: { id: true, name: true }
       })
 
-      const enrichedServiceBreakdown = serviceBreakdown.map((item) => ({
+      const enrichedServiceBreakdown = serviceBreakdown.map((item: { serviceId: string | null }) => ({
         ...item,
         serviceName: services.find(s => s.id === item.serviceId)?.name || 'Unknown'
       }))
@@ -266,14 +266,14 @@ export async function GET(req: Request) {
         })
       ])
 
-      const enrichedTopCustomers = topCustomers.map(customer => ({
+      const enrichedTopCustomers = topCustomers.map((customer: any) => ({
         id: customer.id,
         firstName: customer.firstName,
         lastName: customer.lastName,
         email: customer.email,
         totalOrders: customer._count.orders,
-        totalSpent: customer.orders.reduce((sum, order) => sum + Number(order.totalAmount), 0)
-      })).sort((a, b) => b.totalSpent - a.totalSpent)
+        totalSpent: customer.orders.reduce((sum: number, order: any) => sum + Number(order.totalAmount), 0)
+      })).sort((a: any, b: any) => b.totalSpent - a.totalSpent)
 
       return NextResponse.json({
         newCustomers,
