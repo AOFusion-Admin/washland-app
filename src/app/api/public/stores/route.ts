@@ -7,8 +7,10 @@ import { prisma } from '../../../../../src/lib/prisma'
  */
 export async function GET() {
   try {
+    // Add timeout and limit to prevent memory issues
     const stores = await prisma.store.findMany({
       where: { isActive: true }, // Only show active stores
+      take: 100, // Limit results to prevent memory issues
       select: {
         id: true,
         name: true,
@@ -25,6 +27,7 @@ export async function GET() {
         },
         storeServices: {
           where: { isActive: true },
+          take: 20, // Limit services per store
           select: {
             service: {
               select: {
@@ -62,6 +65,9 @@ export async function GET() {
     return NextResponse.json(formattedStores)
   } catch (err: any) {
     console.error('Public stores GET error:', err)
-    return NextResponse.json({ error: 'Failed to fetch stores' }, { status: 500 })
+    return NextResponse.json({
+      error: 'Failed to fetch stores',
+      details: process.env.NODE_ENV === 'development' ? err.message : undefined
+    }, { status: 500 })
   }
 }

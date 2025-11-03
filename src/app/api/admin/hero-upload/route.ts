@@ -23,6 +23,12 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 })
     }
 
+    // Check file size (limit to 10MB)
+    const maxSize = 10 * 1024 * 1024 // 10MB
+    if (file.size > maxSize) {
+      return NextResponse.json({ error: 'File too large. Maximum size is 10MB.' }, { status: 400 })
+    }
+
     const buffer = Buffer.from(await file.arrayBuffer())
     const originalName = file.name || `upload-${Date.now()}`
     const ext = originalName.split('.').pop() || 'png'

@@ -35,26 +35,37 @@ export default function ContactPage() {
 
   useEffect(() => {
     let mounted = true
-    fetch('/api/public/stores')
-      .then((r) => r.json())
-      .then((data) => {
+    let timeoutId: NodeJS.Timeout
+
+    const fetchStores = async () => {
+      try {
+        const response = await fetch('/api/public/stores')
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`)
+        }
+        const data = await response.json()
+
         if (!mounted) return
+
         if (Array.isArray(data)) {
           setStores(data)
         }
-      })
-      .catch((error) => {
+      } catch (error) {
         console.error('Failed to fetch stores:', error)
         if (!mounted) return
         // Keep empty array on error
-      })
-      .finally(() => {
+      } finally {
         if (!mounted) return
         setStoresLoading(false)
-      })
+      }
+    }
+
+    // Add a small delay to prevent rapid API calls
+    timeoutId = setTimeout(fetchStores, 100)
 
     return () => {
       mounted = false
+      clearTimeout(timeoutId)
     }
   }, [])
 
