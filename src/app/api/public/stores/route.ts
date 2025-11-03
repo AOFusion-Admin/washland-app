@@ -50,7 +50,7 @@ export async function GET() {
       state: store.state,
       pincode: store.zipCode,
       phone: store.phone,
-      email: store.email || `${store.name.toLowerCase().replace(/\s+/g, '')}@washland.com`,
+      email: store.email || `${store.name.toLowerCase().replace(/\s+/g, '')}@washlandlaundry.in`,
       hours: {
         weekday: '7:00 AM - 8:00 PM',
         saturday: '8:00 AM - 6:00 PM',

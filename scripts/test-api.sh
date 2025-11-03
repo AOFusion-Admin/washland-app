@@ -15,7 +15,7 @@ echo "2. Testing with valid structure..."
 curl -X POST "http://localhost:3000/api/admin/store-login" \
   -H "Content-Type: application/json" \
   -d '{
-    "email": "store.admin@washland.com",
+    "email": "store.admin@washlandlaundry.in",
     "password": "admin123",
     "storeId": 1
   }' \

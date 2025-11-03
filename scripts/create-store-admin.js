@@ -26,7 +26,7 @@ async function createStoreAdmin() {
     
     const storeAdmin = await prisma.user.create({
       data: {
-        email: 'store.admin@washland.com',
+        email: 'store.admin@washlandlaundry.in',
         password: hashedPassword,
         firstName: 'Store',
         lastName: 'Admin',
@@ -43,7 +43,7 @@ async function createStoreAdmin() {
     })
 
     console.log(`✅ Store admin created successfully!`)
-    console.log(`   Email: store.admin@washland.com`)
+    console.log(`   Email: store.admin@washlandlaundry.in`)
     console.log(`   Password: admin123`)
     console.log(`   Store: ${store.name}`)
     console.log(`   Store ID: ${store.id}`)

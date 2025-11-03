@@ -18,14 +18,14 @@ export const metadata = {
     address: false,
     telephone: false,
   },
-  metadataBase: new URL('https://washland.com'),
+  metadataBase: new URL('https://washlandlaundry.in'),
   alternates: {
     canonical: '/',
   },
   openGraph: {
     title: 'Washland - Premium Dry Cleaning & Laundry Services',
     description: 'Professional dry cleaning and laundry services with convenient pickup & delivery. Same-day service available.',
-    url: 'https://washland.com',
+    url: 'https://washlandlaundry.in',
     siteName: 'Washland',
     images: [
       {

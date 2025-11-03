@@ -71,103 +71,103 @@ export default function HomePage() {
             </p>
           </div>
           
-          <div className="stagger" style={{ display: 'grid', gap: '2rem', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', marginBottom: '4rem' }}>
-            <div className="card fade-in" style={{ textAlign: 'center', padding: '2rem', border: '1px solid #e5e7eb', transition: 'transform 0.2s, box-shadow 0.2s', animationDelay: '80ms' }}>
+          <div className="stagger" style={{ display: 'grid', gap: '1rem', gridTemplateColumns: 'repeat(4, 1fr)', marginBottom: '4rem' }}>
+            <div className="card fade-in" style={{ textAlign: 'center', padding: '1rem', border: '1px solid #e5e7eb', transition: 'transform 0.2s, box-shadow 0.2s', animationDelay: '80ms' }}>
               <div style={{ 
-                width: '4rem', 
-                height: '4rem', 
+                width: '3rem', 
+                height: '3rem', 
                 backgroundColor: '#1e40af', 
                 borderRadius: '50%', 
                 display: 'flex', 
                 alignItems: 'center', 
                 justifyContent: 'center', 
-                margin: '0 auto 1.5rem',
+                margin: '0 auto 1rem',
                 boxShadow: '0 4px 6px rgba(30, 64, 175, 0.3)'
               }}>
-                <svg style={{ width: '2rem', height: '2rem', color: 'white' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg style={{ width: '1.5rem', height: '1.5rem', color: 'white' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
-              <h3 style={{ fontSize: '1.5rem', fontWeight: '600', marginBottom: '1rem', color: '#1e40af' }}>Lightning Fast Service</h3>
-              <p style={{ color: '#6b7280', fontSize: '1rem', lineHeight: '1.6' }}>
+              <h3 style={{ fontSize: '1.125rem', fontWeight: '600', marginBottom: '0.75rem', color: '#1e40af' }}>Lightning Fast Service</h3>
+              <p style={{ color: '#6b7280', fontSize: '0.875rem', lineHeight: '1.4' }}>
                 Same-day and next-day service available for most items. Express 3-hour service for urgent needs.
               </p>
-              <div style={{ marginTop: '1rem', padding: '0.5rem', backgroundColor: '#eff6ff', borderRadius: '0.5rem', fontSize: '0.875rem', color: '#1e40af', fontWeight: '500' }}>
+              <div style={{ marginTop: '0.75rem', padding: '0.25rem 0.5rem', backgroundColor: '#eff6ff', borderRadius: '0.25rem', fontSize: '0.75rem', color: '#1e40af', fontWeight: '500' }}>
                 ⚡ As fast as 3 hours
               </div>
             </div>
 
-            <div className="card fade-in" style={{ textAlign: 'center', padding: '2rem', border: '1px solid #e5e7eb', transition: 'transform 0.2s, box-shadow 0.2s', animationDelay: '160ms' }}>
+            <div className="card fade-in" style={{ textAlign: 'center', padding: '1rem', border: '1px solid #e5e7eb', transition: 'transform 0.2s, box-shadow 0.2s', animationDelay: '160ms' }}>
               <div style={{ 
-                width: '4rem', 
-                height: '4rem', 
+                width: '3rem', 
+                height: '3rem', 
                 backgroundColor: '#059669', 
                 borderRadius: '50%', 
                 display: 'flex', 
                 alignItems: 'center', 
                 justifyContent: 'center', 
-                margin: '0 auto 1.5rem',
+                margin: '0 auto 1rem',
                 boxShadow: '0 4px 6px rgba(5, 150, 105, 0.3)'
               }}>
-                <svg style={{ width: '2rem', height: '2rem', color: 'white' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg style={{ width: '1.5rem', height: '1.5rem', color: 'white' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z" />
                 </svg>
               </div>
-              <h3 style={{ fontSize: '1.5rem', fontWeight: '600', marginBottom: '1rem', color: '#059669' }}>Free Pickup & Delivery</h3>
-              <p style={{ color: '#6b7280', fontSize: '1rem', lineHeight: '1.6' }}>
+              <h3 style={{ fontSize: '1.125rem', fontWeight: '600', marginBottom: '0.75rem', color: '#059669' }}>Free Pickup & Delivery</h3>
+              <p style={{ color: '#6b7280', fontSize: '0.875rem', lineHeight: '1.4' }}>
                 Convenient pickup and delivery service at your doorstep. Schedule online and track your items in real-time.
               </p>
-                <div style={{ marginTop: '1rem', padding: '0.5rem', backgroundColor: '#ecfdf5', borderRadius: '0.5rem', fontSize: '0.875rem', color: '#059669', fontWeight: '500' }}>
+                <div style={{ marginTop: '0.75rem', padding: '0.25rem 0.5rem', backgroundColor: '#ecfdf5', borderRadius: '0.25rem', fontSize: '0.75rem', color: '#059669', fontWeight: '500' }}>
                 🚚 Free within 12 km
               </div>
             </div>
 
-            <div className="card fade-in" style={{ textAlign: 'center', padding: '2rem', border: '1px solid #e5e7eb', transition: 'transform 0.2s, box-shadow 0.2s', animationDelay: '240ms' }}>
+            <div className="card fade-in" style={{ textAlign: 'center', padding: '1rem', border: '1px solid #e5e7eb', transition: 'transform 0.2s, box-shadow 0.2s', animationDelay: '240ms' }}>
               <div style={{ 
-                width: '4rem', 
-                height: '4rem', 
+                width: '3rem', 
+                height: '3rem', 
                 backgroundColor: '#dc2626', 
                 borderRadius: '50%', 
                 display: 'flex', 
                 alignItems: 'center', 
                 justifyContent: 'center', 
-                margin: '0 auto 1.5rem',
+                margin: '0 auto 1rem',
                 boxShadow: '0 4px 6px rgba(220, 38, 38, 0.3)'
               }}>
-                <svg style={{ width: '2rem', height: '2rem', color: 'white' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg style={{ width: '1.5rem', height: '1.5rem', color: 'white' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
-              <h3 style={{ fontSize: '1.5rem', fontWeight: '600', marginBottom: '1rem', color: '#dc2626' }}>100% Satisfaction Guarantee</h3>
-              <p style={{ color: '#6b7280', fontSize: '1rem', lineHeight: '1.6' }}>
+              <h3 style={{ fontSize: '1.125rem', fontWeight: '600', marginBottom: '0.75rem', color: '#dc2626' }}>100% Satisfaction Guarantee</h3>
+              <p style={{ color: '#6b7280', fontSize: '0.875rem', lineHeight: '1.4' }}>
                 We stand behind our work with a complete satisfaction guarantee. Not happy? We'll make it right or refund your money.
               </p>
-              <div style={{ marginTop: '1rem', padding: '0.5rem', backgroundColor: '#fef2f2', borderRadius: '0.5rem', fontSize: '0.875rem', color: '#dc2626', fontWeight: '500' }}>
+              <div style={{ marginTop: '0.75rem', padding: '0.25rem 0.5rem', backgroundColor: '#fef2f2', borderRadius: '0.25rem', fontSize: '0.75rem', color: '#dc2626', fontWeight: '500' }}>
                 ✅ Money-back guarantee
               </div>
             </div>
 
-            <div className="card fade-in" style={{ textAlign: 'center', padding: '2rem', border: '1px solid #e5e7eb', transition: 'transform 0.2s, box-shadow 0.2s', animationDelay: '320ms' }}>
+            <div className="card fade-in" style={{ textAlign: 'center', padding: '1rem', border: '1px solid #e5e7eb', transition: 'transform 0.2s, box-shadow 0.2s', animationDelay: '320ms' }}>
               <div style={{ 
-                width: '4rem', 
-                height: '4rem', 
+                width: '3rem', 
+                height: '3rem', 
                 backgroundColor: '#7c3aed', 
                 borderRadius: '50%', 
                 display: 'flex', 
                 alignItems: 'center', 
                 justifyContent: 'center', 
-                margin: '0 auto 1.5rem',
+                margin: '0 auto 1rem',
                 boxShadow: '0 4px 6px rgba(124, 58, 237, 0.3)'
               }}>
-                <svg style={{ width: '2rem', height: '2rem', color: 'white' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg style={{ width: '1.5rem', height: '1.5rem', color: 'white' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192L5.636 18.364M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
-              <h3 style={{ fontSize: '1.5rem', fontWeight: '600', marginBottom: '1rem', color: '#7c3aed' }}>24/7 Customer Support</h3>
-              <p style={{ color: '#6b7280', fontSize: '1rem', lineHeight: '1.6' }}>
+              <h3 style={{ fontSize: '1.125rem', fontWeight: '600', marginBottom: '0.75rem', color: '#7c3aed' }}>24/7 Customer Support</h3>
+              <p style={{ color: '#6b7280', fontSize: '0.875rem', lineHeight: '1.4' }}>
                 Got a question, request, or laundry emergency? We're always just a call or chat away, anytime you need us.
               </p>
-              <div style={{ marginTop: '1rem', padding: '0.5rem', backgroundColor: '#f3e8ff', borderRadius: '0.5rem', fontSize: '0.875rem', color: '#7c3aed', fontWeight: '500' }}>
+              <div style={{ marginTop: '0.75rem', padding: '0.25rem 0.5rem', backgroundColor: '#f3e8ff', borderRadius: '0.25rem', fontSize: '0.75rem', color: '#7c3aed', fontWeight: '500' }}>
                 📞 Always available
               </div>
             </div>
@@ -211,7 +211,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      Pricing Section
       <section style={{ padding: '1rem 1rem', backgroundColor: 'white' }}>
         <div style={{ maxWidth: '80rem', margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
@@ -525,7 +524,7 @@ export default function HomePage() {
             </p>
           </div>
 
-          <div style={{ display: 'grid', gap: '1.5rem', maxWidth: '60rem', margin: '0 auto' }}>
+          <div style={{ display: 'grid', gap: '1.5rem', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', maxWidth: '60rem', margin: '0 auto' }}>
             {[
               {
                 question: 'How does Washland\'s laundry service work?',
@@ -819,7 +818,7 @@ export default function HomePage() {
             Get a tailored quote for your business laundry needs. We offer customized solutions for hotels, restaurants, offices, and more.
           </p>
 
-          <div style={{ display: 'grid', gap: '2rem', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', marginBottom: '3rem', maxWidth: '48rem', marginLeft: 'auto', marginRight: 'auto' }}>
+          <div style={{ display: 'grid', gap: '2rem', gridTemplateColumns: 'repeat(3, 1fr)', marginBottom: '3rem', maxWidth: '48rem', marginLeft: 'auto', marginRight: 'auto' }}>
             <div style={{ padding: '1.5rem', backgroundColor: 'rgba(255, 255, 255, 0.1)', borderRadius: '0.75rem', backdropFilter: 'blur(10px)' }}>
               <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>🏨</div>
               <h3 style={{ fontSize: '1.125rem', fontWeight: '600', color: 'white', marginBottom: '0.5rem' }}>Hotels & Hospitality</h3>
@@ -914,8 +913,8 @@ export default function HomePage() {
               <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
                 <li style={{ marginBottom: '0.5rem' }}><a href="#about" style={{ color: '#9ca3af', textDecoration: 'none', fontSize: '0.875rem' }}>About Us</a></li>
                 <li style={{ marginBottom: '0.5rem' }}><a href="#locations" style={{ color: '#9ca3af', textDecoration: 'none', fontSize: '0.875rem' }}>Locations</a></li>
-                <li style={{ marginBottom: '0.5rem' }}><a href="#" style={{ color: '#9ca3af', textDecoration: 'none', fontSize: '0.875rem' }}>Franchise</a></li>
-                <li style={{ marginBottom: '0.5rem' }}><a href="#" style={{ color: '#9ca3af', textDecoration: 'none', fontSize: '0.875rem' }}>Contact</a></li>
+                <li style={{ marginBottom: '0.5rem' }}><a href="/franchise" style={{ color: '#9ca3af', textDecoration: 'none', fontSize: '0.875rem' }}>Franchise</a></li>
+                <li style={{ marginBottom: '0.5rem' }}><a href="/contact" style={{ color: '#9ca3af', textDecoration: 'none', fontSize: '0.875rem' }}>Contact</a></li>
               </ul>
             </div>
             {/* <div>

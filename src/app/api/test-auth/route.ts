@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
     
     // Try to find the test user
     const testUser = await prisma.user.findUnique({
-      where: { email: 'admin@washland.com' }
+      where: { email: 'admin@washlandlaundry.in' }
     })
 
     return NextResponse.json({

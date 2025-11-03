@@ -35,12 +35,12 @@ export default function AuthTestPage() {
 
   const simulateWashlandLogin = () => {
     localStorage.setItem('userRole', 'SUPER_ADMIN')
-    localStorage.setItem('userEmail', 'admin@washland.com')
+    localStorage.setItem('userEmail', 'admin@washlandlaundry.in')
     
     window.dispatchEvent(new CustomEvent('auth:session', { 
       detail: { 
         role: 'SUPER_ADMIN', 
-        email: 'admin@washland.com',
+        email: 'admin@washlandlaundry.in',
         id: 'test-user-id',
         name: 'Washland Admin'
       } 

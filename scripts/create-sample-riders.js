@@ -11,21 +11,21 @@ async function createSampleRiders() {
     
     const riders = [
       {
-        email: 'rider1@washland.com',
+        email: 'rider1@washlandlaundry.in',
         firstName: 'Ravi',
         lastName: 'Kumar',
         phone: '+91 9876543220',
         role: 'RIDER'
       },
       {
-        email: 'rider2@washland.com',
+        email: 'rider2@washlandlaundry.in',
         firstName: 'Suresh',
         lastName: 'Reddy',
         phone: '+91 9876543221',
         role: 'RIDER'
       },
       {
-        email: 'rider3@washland.com',
+        email: 'rider3@washlandlaundry.in',
         firstName: 'Mahesh',
         lastName: 'Singh',
         phone: '+91 9876543222',

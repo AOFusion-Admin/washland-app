@@ -15,4 +15,4 @@ Disallow: /customer/
 Disallow: /api/
 
 # Sitemap location
-Sitemap: https://washland.com/sitemap.xml
+Sitemap: https://washlandlaundry.in/sitemap.xml

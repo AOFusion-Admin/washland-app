@@ -31,7 +31,7 @@ const STORES: Store[] = [
     state: 'Telangana',
     pincode: '500084',
     phone: '+91 40 1234 5678',
-    email: 'kondapur@washland.com',
+    email: 'kondapur@washlandlaundry.in',
     lat: 17.4474, // Approximate coordinates for Kondapur, Hyderabad
     lon: 78.3762,
     hours: {

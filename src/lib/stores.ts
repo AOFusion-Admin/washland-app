@@ -26,7 +26,7 @@ export const STORES: Store[] = [
     state: 'Karnataka',
     pincode: '560001',
     phone: '+91 80 1234 5678',
-    email: 'mgroad@washland.com',
+    email: 'mgroad@washlandlaundry.in',
     lat: 12.9715987,
     lon: 77.5945627,
     hours: {
@@ -44,7 +44,7 @@ export const STORES: Store[] = [
     state: 'Maharashtra',
     pincode: '400001',
     phone: '+91 22 2345 6789',
-    email: 'uptown@washland.com',
+    email: 'uptown@washlandlaundry.in',
     lat: 19.076090,
     lon: 72.877426,
     hours: {
@@ -62,7 +62,7 @@ export const STORES: Store[] = [
     state: 'Tamil Nadu',
     pincode: '600001',
     phone: '+91 44 3456 7890',
-    email: 'westside@washland.com',
+    email: 'westside@washlandlaundry.in',
     lat: 13.082680,
     lon: 80.270718,
     hours: {
@@ -80,7 +80,7 @@ export const STORES: Store[] = [
     state: 'Telangana',
     pincode: '500081',
     phone: '+91 40 1234 5678',
-    email: 'hitech@washland.com',
+    email: 'hitech@washlandlaundry.in',
     lat: 17.4474,
     lon: 78.3910,
     hours: {
