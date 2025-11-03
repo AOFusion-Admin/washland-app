@@ -26,10 +26,26 @@ export default function SignInPage() {
 
       if (result?.error) {
         setError("Invalid email or password")
-      } else {
+      } else if (result?.ok) {
         // Get the session to determine redirect based on role
         const session = await getSession()
         if (session?.user) {
+          // Store user data in localStorage for dashboard access
+          localStorage.setItem('userId', session.user.id)
+          localStorage.setItem('userEmail', session.user.email || '')
+          localStorage.setItem('userRole', session.user.role)
+          localStorage.setItem('userName', `${session.user.firstName} ${session.user.lastName}`)
+
+          // Dispatch event to notify Header component
+          window.dispatchEvent(new CustomEvent('auth:session', {
+            detail: {
+              role: session.user.role,
+              email: session.user.email,
+              id: session.user.id,
+              name: `${session.user.firstName} ${session.user.lastName}`
+            }
+          }))
+
           switch (session.user.role) {
             case "SUPER_ADMIN":
               router.push("/admin/super")
@@ -46,7 +62,11 @@ export default function SignInPage() {
             default:
               router.push("/")
           }
+        } else {
+          setError("Authentication failed - no session")
         }
+      } else {
+        setError("Authentication failed")
       }
     } catch (err) {
       setError("An error occurred. Please try again.")

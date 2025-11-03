@@ -54,6 +54,7 @@ export async function GET() {
       pincode: store.zipCode,
       phone: store.phone,
       email: store.email || `${store.name.toLowerCase().replace(/\s+/g, '')}@washlandlaundry.in`,
+      franchise: store.franchise, // Include franchise data
       hours: {
         weekday: '7:00 AM - 8:00 PM',
         saturday: '8:00 AM - 6:00 PM',

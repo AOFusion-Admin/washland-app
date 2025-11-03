@@ -10,9 +10,9 @@ interface Store {
   name: string
   city: string
   state: string
-  franchise: {
+  franchise?: {
     name: string
-  }
+  } | null
 }
 
 export default function AdminLoginPage() {
@@ -107,7 +107,13 @@ export default function AdminLoginPage() {
         }))
         
         toast.success('Login Successful', `Welcome to ${data.storeName}!`)
-        router.push('/admin/dashboard')
+        
+        // Redirect based on user role
+        if (data.user.role === 'SUPER_ADMIN') {
+          router.push('/washland/dashboard')
+        } else {
+          router.push('/admin/dashboard')
+        }
       } else {
         setError(data.error || 'Login failed')
         if (data.type === 'invalid_credentials') {
@@ -164,7 +170,7 @@ export default function AdminLoginPage() {
               </option>
               {stores.map(store => (
                 <option key={store.id} value={store.id}>
-                  {store.name} — {store.city}, {store.state} ({store.franchise.name})
+                  {store.name} — {store.city}, {store.state} ({store.franchise?.name || 'No Franchise'})
                 </option>
               ))}
             </select>

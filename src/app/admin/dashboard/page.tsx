@@ -393,8 +393,7 @@ function QuickActionCard({ title, description, href, icon, color }: QuickActionC
   const toast = useToast()
   
   const handleClick = () => {
-    // For now, show coming soon message
-    toast.info('Coming Soon', `${title} feature will be available soon.`)
+    router.push(href)
   }
 
   return (

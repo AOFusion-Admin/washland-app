@@ -136,7 +136,7 @@ model Service {
   id          String   @id @default(cuid())
   name        String
   description String?
-  basePrice   Decimal  @db.Decimal(10, 2)
+  basePrice   Decimal  // Changed from Decimal for SQLite compatibility
   category    String   // e.g., "Dry Cleaning", "Laundry", "Alterations"
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
@@ -155,7 +155,7 @@ model StoreService {
   store     Store   @relation(fields: [storeId], references: [id])
   serviceId String
   service   Service @relation(fields: [serviceId], references: [id])
-  price     Decimal @db.Decimal(10, 2)
+  price     Decimal   // Changed from Decimal for SQLite compatibility
   isActive  Boolean @default(true)
 
   @@unique([storeId, serviceId])
@@ -166,8 +166,8 @@ model SubscriptionPlan {
   id            String   @id @default(cuid())
   name          String
   description   String?
-  monthlyPrice  Decimal  @db.Decimal(10, 2)
-  discountRate  Decimal  @db.Decimal(5, 2) // percentage discount
+  monthlyPrice  Decimal    // Changed from Decimal for SQLite compatibility
+  discountRate  Decimal    // Changed from Decimal for SQLite compatibility
   maxOrders     Int      // max orders per month
   isActive      Boolean  @default(true)
   createdAt     DateTime @default(now())
@@ -218,7 +218,7 @@ model Order {
   address         Address       @relation(fields: [addressId], references: [id])
   status          OrderStatus   @default(PENDING)
   paymentStatus   PaymentStatus @default(PENDING)
-  totalAmount     Decimal       @db.Decimal(10, 2)
+  totalAmount     Decimal         // Changed from Decimal for SQLite compatibility
   pickupDate      DateTime?
   deliveryDate    DateTime?
   specialInstructions String?
@@ -245,7 +245,7 @@ model OrderItem {
   serviceId String
   service   Service @relation(fields: [serviceId], references: [id])
   quantity  Int
-  price     Decimal @db.Decimal(10, 2)
+  price     Decimal   // Changed from Decimal for SQLite compatibility
   notes     String?
 
   @@map("order_items")
@@ -345,7 +345,7 @@ model Wallet {
   id        String   @id @default(cuid())
   userId    String   @unique
   user      User     @relation(fields: [userId], references: [id])
-  balance   Decimal  @db.Decimal(10, 2) @default(0)
+  balance   Decimal    // Changed from Decimal for SQLite compatibility
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -359,9 +359,9 @@ model WalletTransaction {
   walletId   String
   wallet     Wallet      @relation(fields: [walletId], references: [id])
   type       WalletTxType
-  amount     Decimal     @db.Decimal(10, 2)
+  amount     Decimal       // Changed from Decimal for SQLite compatibility
   source     String?     // e.g., "REFERRAL_CREDIT", "ORDER_PAYMENT", "REFUND"
-  metadata   Json?
+  metadata   Json?     // Changed from Json for SQLite compatibility
   createdAt  DateTime    @default(now())
 
   @@map("wallet_transactions")
