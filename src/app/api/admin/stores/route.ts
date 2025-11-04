@@ -4,6 +4,8 @@ import requireAdminHybrid from '../../../../../src/lib/hybrid-auth'
 import { hashPassword } from '../../../../../src/lib/password'
 import { checkUserDuplicates, getDuplicateErrorMessage } from '../../../../../src/lib/user-validation'
 import { UserRole } from '@prisma/client'
+import { logActivity } from '../../../../../src/lib/activity-logger'
+import { generateTempPassword, sendWelcomeEmail, generateResetToken } from '../../../../../src/lib/email'
 
 export async function GET(req: Request) {
   try {
@@ -111,7 +113,7 @@ export async function POST(req: Request) {
       }
 
       // Generate a temporary password for the new admin
-      const tempPassword = Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8)
+      const tempPassword = generateTempPassword()
       const hashedPassword = await hashPassword(tempPassword)
       
       // Create new STORE_ADMIN user
@@ -128,10 +130,20 @@ export async function POST(req: Request) {
       })
       isNewAdmin = true
       
-      // TODO: Send email with login credentials to the store manager
-      // This would typically integrate with an email service
-      console.log(`Store admin account created for ${managerEmail}`)
-      console.log(`Temporary password: ${tempPassword}`) // Remove this in production
+      // Send welcome email with temporary password
+      await sendWelcomeEmail(managerEmail, managerFirstName, managerLastName, tempPassword, 'Store Manager')
+      
+      // Create password reset token for first login
+      const resetToken = generateResetToken()
+      const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days
+
+      await (prisma as any).passwordResetToken.create({
+        data: {
+          token: resetToken,
+          userId: admin.id,
+          expiresAt
+        }
+      })
     }
 
     const store = await prisma.store.create({
@@ -157,9 +169,21 @@ export async function POST(req: Request) {
       }
     })
 
-    // TODO: Send email with login credentials to the store manager
-    // This would typically integrate with an email service
-    console.log(`Store admin account ${isNewAdmin ? 'created' : 'updated'} for ${managerEmail}`)
+    // Log the store creation activity
+    await logActivity({
+      type: 'STORE_CREATED',
+      description: `New store "${name}" added to ${franchise.name} franchise`,
+      userId: (auth as any)?.id || null,
+      metadata: {
+        storeId: store.id,
+        storeName: name,
+        franchiseId: franchise.id,
+        franchiseName: franchise.name,
+        adminId: admin.id,
+        adminEmail: managerEmail,
+        city: city
+      }
+    })
 
     return NextResponse.json({
       store,

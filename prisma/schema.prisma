@@ -42,6 +42,29 @@ enum SubscriptionStatus {
   EXPIRED
 }
 
+enum ActivityType {
+  FRANCHISE_CREATED
+  STORE_CREATED
+  USER_REGISTERED
+  ORDER_PLACED
+  ORDER_COMPLETED
+  PAYMENT_RECEIVED
+  SUBSCRIPTION_CREATED
+  REFERRAL_REWARDED
+}
+
+model Activity {
+  id          String       @id @default(cuid())
+  type        ActivityType
+  description String
+  userId      String?
+  user        User?        @relation(fields: [userId], references: [id])
+  metadata    Json?
+  createdAt   DateTime     @default(now())
+
+  @@map("activities")
+}
+
 model User {
   id            String    @id @default(cuid())
   email         String    @unique
@@ -73,7 +96,21 @@ model User {
   loyaltyPoints     LoyaltyPoint[]
   wallet            Wallet?
 
+  activities         Activity[]
+  passwordResetTokens PasswordResetToken[]
+
   @@map("users")
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@map("password_reset_tokens")
 }
 
 model Franchise {

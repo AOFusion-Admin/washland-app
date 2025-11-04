@@ -135,6 +135,54 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
   }
 }
 
+export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
+  try {
+    const auth = await requireAdminHybrid(req)
+    if (auth instanceof NextResponse && auth.status === 401) return auth
+
+    const { id } = await params
+    const body = await req.json()
+    const { isActive } = body
+
+    // Check if user exists
+    const existingUser = await prisma.user.findUnique({
+      where: { id }
+    })
+    
+    if (!existingUser) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 })
+    }
+
+    // Prevent deactivating super admin
+    if (existingUser.role === 'SUPER_ADMIN' && isActive === false) {
+      return NextResponse.json({ error: 'Cannot deactivate super admin users' }, { status: 400 })
+    }
+
+    const updatedUser = await prisma.user.update({
+      where: { id },
+      data: { isActive },
+      include: {
+        managedFranchises: true,
+        managedStores: {
+          include: {
+            franchise: true
+          }
+        },
+        _count: {
+          select: {
+            orders: true
+          }
+        }
+      }
+    })
+
+    return NextResponse.json(updatedUser)
+  } catch (err) {
+    console.error('user PATCH error', err)
+    return NextResponse.json({ error: err instanceof Error ? err.message : 'failed' }, { status: 500 })
+  }
+}
+
 export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const auth = await requireAdminHybrid(req)

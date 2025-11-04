@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { logActivity } from '@/lib/activity-logger'
 
 export async function POST(request: NextRequest) {
   try {
@@ -76,6 +77,22 @@ export async function POST(request: NextRequest) {
           },
           store: true,
           address: true
+        }
+      })
+
+      // Log the reorder activity
+      await logActivity({
+        type: 'ORDER_PLACED',
+        description: `Reorder ${newOrder.orderNumber} placed for ₹${newOrder.totalAmount}`,
+        userId: userId,
+        metadata: {
+          orderId: newOrder.id,
+          orderNumber: newOrder.orderNumber,
+          totalAmount: newOrder.totalAmount,
+          storeId: newOrder.storeId,
+          storeName: newOrder.store.name,
+          originalOrderNumber: originalOrder.orderNumber,
+          isReorder: true
         }
       })
 

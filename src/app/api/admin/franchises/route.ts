@@ -3,6 +3,9 @@ import { prisma } from '../../../../../src/lib/prisma'
 import requireAdminHybrid from '../../../../../src/lib/hybrid-auth'
 import { checkUserDuplicates, getDuplicateErrorMessage } from '../../../../../src/lib/user-validation'
 import { UserRole } from '@prisma/client'
+import { logActivity } from '../../../../../src/lib/activity-logger'
+import { hashPassword } from '../../../../../src/lib/password'
+import { generateTempPassword, sendWelcomeEmail, generateResetToken } from '../../../../../src/lib/email'
 
 export async function GET() {
   try {
@@ -84,17 +87,47 @@ export async function POST(req: Request) {
         }, { status: 400 })
       }
 
+      // Generate temporary password
+      const tempPassword = generateTempPassword()
+      const hashedPassword = await hashPassword(tempPassword)
+
       // Create new FRANCHISE_ADMIN user
       admin = await prisma.user.create({ 
         data: { 
           email: adminEmail, 
-          password: '', // Admin should set password via onboarding/reset
+          password: hashedPassword,
           firstName: adminFirstName,
           lastName: adminLastName,
           phone: adminPhone || '',
           role: UserRole.FRANCHISE_ADMIN, 
           isActive: true 
         } 
+      })
+
+      // Send welcome email with temporary password
+      const emailSent = await sendWelcomeEmail(
+        adminEmail,
+        adminFirstName,
+        adminLastName,
+        tempPassword,
+        'Franchise Admin'
+      )
+
+      if (!emailSent) {
+        console.error('Failed to send welcome email to franchise admin:', adminEmail)
+        // Continue anyway - user can still reset password
+      }
+
+      // Create password reset token for additional security
+      const resetToken = generateResetToken()
+      const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days
+
+      await (prisma as any).passwordResetToken.create({
+        data: {
+          token: resetToken,
+          userId: admin.id,
+          expiresAt
+        }
       })
     }
 
@@ -107,6 +140,19 @@ export async function POST(req: Request) {
       include: {
         admin: true,
         stores: true
+      }
+    })
+
+    // Log the franchise creation activity
+    await logActivity({
+      type: 'FRANCHISE_CREATED',
+      description: `New franchise "${name}" was created`,
+      userId: (auth as any)?.id || null,
+      metadata: {
+        franchiseId: franchise.id,
+        franchiseName: name,
+        adminId: admin.id,
+        adminEmail: admin.email
       }
     })
     

@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma"
 import { hashPassword } from "@/lib/password"
 import { checkUserDuplicates, getDuplicateErrorMessage } from "@/lib/user-validation"
 import { z } from "zod"
+import { logActivity } from "@/lib/activity-logger"
 
 const signupSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
@@ -51,6 +52,18 @@ export async function POST(request: NextRequest) {
         email: true,
         role: true,
         createdAt: true,
+      }
+    })
+
+    // Log the user registration activity
+    await logActivity({
+      type: 'USER_REGISTERED',
+      description: `New customer "${validatedData.firstName} ${validatedData.lastName}" registered`,
+      userId: user.id,
+      metadata: {
+        userId: user.id,
+        email: validatedData.email,
+        role: user.role
       }
     })
 

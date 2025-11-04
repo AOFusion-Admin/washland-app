@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireAdminHybrid } from '@/lib/hybrid-auth'
 import { prisma } from '@/lib/prisma'
 import { OrderStatus, PaymentStatus } from '@prisma/client'
+import { logActivity } from '@/lib/activity-logger'
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -176,6 +177,41 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
           }
         }
       })
+
+      // Log activity if payment status changed to PAID
+      if (paymentStatus === 'PAID' && existingOrder.paymentStatus !== 'PAID') {
+        await logActivity({
+          type: 'PAYMENT_RECEIVED',
+          description: `Payment of ₹${updatedOrder.totalAmount} received for order ${updatedOrder.orderNumber}`,
+          userId: updatedOrder.userId,
+          metadata: {
+            orderId: updatedOrder.id,
+            orderNumber: updatedOrder.orderNumber,
+            amount: updatedOrder.totalAmount,
+            storeId: updatedOrder.storeId,
+            storeName: updatedOrder.store.name,
+            franchiseName: updatedOrder.store.franchise.name,
+            customerName: updatedOrder.user ? `${updatedOrder.user.firstName} ${updatedOrder.user.lastName}` : 'Walk-in Customer'
+          }
+        })
+      }
+
+      // Log activity if order status changed to COMPLETED
+      if (status === 'COMPLETED' && existingOrder.status !== 'COMPLETED') {
+        await logActivity({
+          type: 'ORDER_COMPLETED',
+          description: `Order ${updatedOrder.orderNumber} completed and delivered`,
+          userId: updatedOrder.userId,
+          metadata: {
+            orderId: updatedOrder.id,
+            orderNumber: updatedOrder.orderNumber,
+            totalAmount: updatedOrder.totalAmount,
+            storeId: updatedOrder.storeId,
+            storeName: updatedOrder.store.name,
+            franchiseName: updatedOrder.store.franchise.name
+          }
+        })
+      }
 
       return NextResponse.json({
         success: true,

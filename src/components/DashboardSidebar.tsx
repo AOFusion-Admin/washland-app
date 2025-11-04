@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { useRouter, usePathname } from 'next/navigation'
-import { useState, useEffect, ReactElement, useRef } from 'react'
+import { useState, useEffect, ReactElement, useRef, useCallback, useMemo } from 'react'
 import { createPortal } from 'react-dom'
 
 export interface SidebarItem {
@@ -218,7 +218,7 @@ export default function DashboardSidebar({
     ]
   }
 
-  const navigationItems = getNavigationItems(userRole)
+  const navigationItems = useMemo(() => getNavigationItems(userRole), [userRole])
 
   const toggleExpanded = (itemLabel: string) => {
     const newExpanded = new Set(expandedItems)
@@ -230,26 +230,44 @@ export default function DashboardSidebar({
     setExpandedItems(newExpanded)
   }
 
-  const isActiveRoute = (href: string) => {
-    return pathname === href || pathname.startsWith(href + '/')
-  }
+  const activeRoutes = useMemo(() => {
+    const routes = new Set<string>()
+    navigationItems.forEach(item => {
+      if (pathname === item.href || pathname.startsWith(item.href + '/')) {
+        routes.add(item.href)
+      }
+      if (item.children) {
+        item.children.forEach(child => {
+          if (pathname === child.href || pathname.startsWith(child.href + '/')) {
+            routes.add(child.href)
+          }
+        })
+      }
+    })
+    return routes
+  }, [navigationItems, pathname])
+
+  const isActiveRoute = useCallback((href: string) => {
+    return activeRoutes.has(href)
+  }, [activeRoutes])
 
   return (
     <div className="sidebar" style={{
-      width: isCollapsed ? '80px' : '280px',
-      height: 'calc(100vh - 4.5rem)', // Adjust height to account for header
+      width: isCollapsed ? '100px' : '280px',
+      minHeight: 'calc(100vh - 4.5rem)', // Minimum height to account for header
       backgroundColor: '#f8fafc', // Light gray background
       color: '#1e293b', // Dark text for contrast
       position: 'fixed',
       left: 0,
       top: '4.5rem', // Start below the header (header height is 4.5rem)
-      overflowY: 'auto',
-      overflowX: 'visible', // Allow tooltips to extend outside
       zIndex: 50, // Lower z-index to stay below header
       boxShadow: '4px 0 24px rgba(0, 0, 0, 0.1)',
       border: 'none',
       borderRight: '1px solid #e2e8f0',
-      transition: 'width 0.3s ease'
+      transition: 'width 0.3s ease',
+      display: 'flex',
+      flexDirection: 'column',
+      overflow: 'hidden' // Contain scrolling within the sidebar
     }}>
       {/* Logo Header */}
       <div style={{
@@ -265,9 +283,11 @@ export default function DashboardSidebar({
             style={{
               position: 'absolute',
               top: isCollapsed ? 'auto' : '1rem',
-              bottom: isCollapsed ? '0.5rem' : 'auto',
-              right: isCollapsed ? '50%' : '1rem',
-              transform: isCollapsed ? 'translateX(50%)' : 'none',
+              bottom: isCollapsed ? '1rem' : 'auto',
+              ...(isCollapsed
+                ? { left: '-6px' } // Left side when collapsed
+                : { right: '-5px' } // Right side when expanded
+              ),
               width: '32px',
               height: '32px',
               backgroundColor: 'rgba(255, 255, 255, 0.2)',
@@ -297,11 +317,10 @@ export default function DashboardSidebar({
             display: 'flex', 
             alignItems: 'center', 
             gap: isCollapsed ? '0' : '1rem', 
-            marginBottom: isCollapsed ? '0' : '0.75rem',
             justifyContent: isCollapsed ? 'center' : 'flex-start'
           }}>
             <div style={{
-              width: '48px',
+              width: '42px',
               height: '48px',
               backgroundColor: 'rgba(255, 255, 255, 0.15)',
               borderRadius: '12px',
@@ -312,10 +331,10 @@ export default function DashboardSidebar({
               border: '1px solid rgba(255, 255, 255, 0.2)'
             }}>
               <Image 
-                src="/logo.png" 
+                src="/logo2.png" 
                 alt="Washland" 
                 width={32} 
-                height={32} 
+                height={38} 
                 style={{ 
                   filter: 'brightness(0) invert(1)',
                   objectFit: 'contain'
@@ -337,31 +356,24 @@ export default function DashboardSidebar({
                   color: 'rgba(255, 255, 255, 0.9)',
                   fontWeight: '500'
                 }}>
-                  {userRole === 'SUPER_ADMIN' ? 'Super Admin' : 
-                   userRole === 'FRANCHISE_ADMIN' ? 'Franchise Admin' :
-                   userRole === 'STORE_ADMIN' ? 'Store Admin' : 'Dashboard'}
+                  {userName}
                 </div>
               </div>
             )}
           </div>
         </Link>
-        
-        {!isCollapsed && userName && (
-          <div style={{ fontSize: '0.875rem', color: 'rgba(255, 255, 255, 0.9)', marginTop: '0.5rem' }}>
-            {userName}
-          </div>
-        )}
-        {!isCollapsed && userEmail && (
-          <div style={{ fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.8)' }}>
-            {userEmail}
-          </div>
-        )}
       </div>
 
       {/* Navigation */}
       <nav style={{ 
         padding: '1rem 0',
-        overflow: 'visible' // Allow tooltips to extend outside
+        overflowY: 'auto',
+        overflowX: 'visible', // Allow tooltips to extend outside
+        flex: '1 1 auto', // Take remaining space, can grow and shrink
+        minHeight: 0, // Allow flex item to shrink below content size for scrolling
+        maxHeight: '60vh', // Force scrolling when content exceeds this height
+        scrollbarWidth: 'thin', // Firefox
+        scrollbarColor: '#cbd5e1 #f8fafc' // Firefox
       }}
       onMouseLeave={() => {
         // Hide all tooltips when mouse leaves navigation area
@@ -393,7 +405,7 @@ export default function DashboardSidebar({
                   cursor: 'pointer',
                   backgroundColor: isActiveRoute(item.href) ? 'rgba(59, 130, 246, 0.1)' : 'transparent',
                   border: isActiveRoute(item.href) ? '1px solid rgba(59, 130, 246, 0.2)' : '1px solid transparent',
-                  transition: 'all 0.2s ease',
+                  transition: 'background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease',
                   color: isActiveRoute(item.href) ? '#1e40af' : '#475569',
                   justifyContent: 'flex-start',
                   position: 'relative'
@@ -464,7 +476,7 @@ export default function DashboardSidebar({
                     cursor: 'pointer',
                     backgroundColor: isActiveRoute(item.href) ? 'rgba(59, 130, 246, 0.1)' : 'transparent',
                     border: isActiveRoute(item.href) ? '1px solid rgba(59, 130, 246, 0.2)' : '1px solid transparent',
-                    transition: 'all 0.2s ease',
+                    transition: 'background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease',
                     color: isActiveRoute(item.href) ? '#1e40af' : '#475569',
                     justifyContent: isCollapsed ? 'center' : 'flex-start',
                     position: 'relative'
@@ -528,7 +540,7 @@ export default function DashboardSidebar({
                 {isCollapsed && (
                   <div style={{
                     position: 'fixed',
-                    left: '90px',
+                    left: '110px',
                     top: '0px', // Will be updated via JavaScript
                     transform: 'translateY(-50%)',
                     backgroundColor: '#1f2937',
@@ -670,7 +682,7 @@ export default function DashboardSidebar({
                       color: isActiveRoute(child.href) ? '#1e40af' : '#64748b',
                       textDecoration: 'none',
                       backgroundColor: isActiveRoute(child.href) ? 'rgba(59, 130, 246, 0.1)' : 'transparent',
-                      transition: 'all 0.2s ease',
+                      transition: 'background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease',
                       borderLeft: isActiveRoute(child.href) ? '2px solid #3b82f6' : '2px solid transparent'
                     }}
                     onMouseEnter={(e) => {
@@ -700,101 +712,50 @@ export default function DashboardSidebar({
 
       {/* Footer */}
       <div style={{
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
         padding: '1rem',
         borderTop: '1px solid #e2e8f0',
         backgroundColor: '#ffffff',
-        boxShadow: '0 -2px 8px rgba(0, 0, 0, 0.05)'
+        boxShadow: '0 -2px 8px rgba(0, 0, 0, 0.05)',
+        marginTop: 'auto' // Push footer to bottom
       }}>
         <div style={{ position: 'relative' }}>
-          <button
-            onClick={onSignOut}
-            style={{
-              width: '100%',
-              padding: '0.75rem',
-              background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
-              color: 'white',
-              border: 'none',
-              borderRadius: '8px',
-              fontSize: '0.875rem',
-              fontWeight: '600',
-              cursor: 'pointer',
+          {/* User info display instead of sign out */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.75rem',
+            padding: '0.5rem',
+            backgroundColor: '#f8fafc',
+            borderRadius: '8px',
+            border: '1px solid #e2e8f0'
+          }}>
+            <div style={{
+              width: '32px',
+              height: '32px',
+              background: 'linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)',
+              borderRadius: '50%',
               display: 'flex',
               alignItems: 'center',
-              justifyContent: isCollapsed ? 'center' : 'center',
-              gap: isCollapsed ? '0' : '0.5rem',
-              transition: 'all 0.2s ease',
-              position: 'relative'
-            }}
-            onMouseEnter={(e) => {
-              // Hide all other tooltips first
-              const allTooltips = document.querySelectorAll('.tooltip-text') as NodeListOf<HTMLElement>
-              allTooltips.forEach(tooltip => {
-                tooltip.style.opacity = '0'
-                tooltip.style.pointerEvents = 'none'
-              })
-
-              e.currentTarget.style.background = 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)'
-              e.currentTarget.style.transform = 'translateY(-1px)'
-              e.currentTarget.style.boxShadow = '0 4px 12px rgba(239, 68, 68, 0.3)'
-              
-              // Show tooltip for collapsed mode
-              if (isCollapsed) {
-                const tooltip = e.currentTarget.parentElement?.querySelector('.tooltip-text') as HTMLElement
-                if (tooltip) {
-                  tooltip.style.opacity = '1'
-                  tooltip.style.pointerEvents = 'auto'
-                }
-              }
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)'
-              e.currentTarget.style.transform = 'translateY(0px)'
-              e.currentTarget.style.boxShadow = 'none'
-              
-              // Hide tooltip
-              if (isCollapsed) {
-                const tooltip = e.currentTarget.parentElement?.querySelector('.tooltip-text') as HTMLElement
-                if (tooltip) {
-                  tooltip.style.opacity = '0'
-                  tooltip.style.pointerEvents = 'none'
-                }
-              }
-            }}
-          >
-            <SignOutIcon />
-            {!isCollapsed && 'Sign Out'}
-          </button>
-
-          {/* Tooltip for collapsed mode */}
-          {isCollapsed && (
-            <div
-              style={{
-                position: 'fixed',
-                left: '70px',
-                bottom: '20px',
-                backgroundColor: 'rgba(0, 0, 0, 0.9)',
-                color: 'white',
-                padding: '8px 12px',
-                borderRadius: '6px',
-                fontSize: '14px',
-                fontWeight: '500',
-                whiteSpace: 'nowrap',
-                zIndex: 1000,
-                opacity: 0,
-                pointerEvents: 'none',
-                transition: 'opacity 0.2s ease',
-                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-                border: '1px solid rgba(255, 255, 255, 0.1)'
-              }}
-              className="tooltip-text"
-            >
-              Sign Out
+              justifyContent: 'center',
+              color: 'white',
+              fontSize: '0.875rem',
+              fontWeight: '600'
+            }}>
+              {userName ? userName.charAt(0).toUpperCase() : userEmail?.charAt(0).toUpperCase() || 'A'}
             </div>
-          )}
+            {!isCollapsed && (
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: '0.875rem', fontWeight: '500', color: '#374151' }}>
+                  {userName || 'Admin'}
+                </div>
+                <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>
+                  {userRole === 'SUPER_ADMIN' ? 'Super Admin' :
+                   userRole === 'FRANCHISE_ADMIN' ? 'Franchise Admin' :
+                   userRole === 'STORE_ADMIN' ? 'Store Admin' : 'User'}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

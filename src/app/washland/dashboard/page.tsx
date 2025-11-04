@@ -18,6 +18,7 @@ export default function WashlandDashboard() {
     activeOrders: 0,
     totalRevenue: '₹0'
   })
+  const [recentActivities, setRecentActivities] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -59,6 +60,7 @@ export default function WashlandDashboard() {
   useEffect(() => {
     if (ready) {
       fetchDashboardStats()
+      fetchRecentActivities()
     }
   }, [ready])
 
@@ -71,10 +73,10 @@ export default function WashlandDashboard() {
       if (analyticsResponse.ok) {
         const analytics = await analyticsResponse.json()
         setDashboardStats({
-          totalFranchises: analytics.totalFranchises || 0,
-          totalStores: analytics.totalStores || 0,
-          activeOrders: analytics.activeOrders || 0,
-          totalRevenue: `₹${(analytics.totalRevenue || 0).toLocaleString('en-IN')}`
+          totalFranchises: analytics.metrics?.franchiseCount || 0,
+          totalStores: analytics.metrics?.storeCount || 0,
+          activeOrders: analytics.metrics?.activeOrders || 0,
+          totalRevenue: `₹${(analytics.metrics?.totalRevenue || 0).toLocaleString('en-IN')}`
         })
       } else {
         // Fallback: fetch individual endpoints
@@ -105,6 +107,18 @@ export default function WashlandDashboard() {
     }
   }
 
+  const fetchRecentActivities = async () => {
+    try {
+      const response = await fetch('/api/admin/activities?limit=10')
+      if (response.ok) {
+        const data = await response.json()
+        setRecentActivities(data.activities || [])
+      }
+    } catch (error) {
+      console.error('Failed to fetch recent activities:', error)
+    }
+  }
+
   function handleSignOut() {
     // Clear localStorage
     localStorage.removeItem('userRole')
@@ -122,6 +136,36 @@ export default function WashlandDashboard() {
   }
 
   if (!ready) return null
+
+  // Helper functions
+  function formatTimeAgo(date: Date): string {
+    const now = new Date()
+    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000)
+
+    if (diffInSeconds < 60) return 'Just now'
+    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} minutes ago`
+    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} hours ago`
+    if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)} days ago`
+    return date.toLocaleDateString()
+  }
+
+  function getActivityType(activityType: string): 'franchise' | 'user' | 'order' | 'revenue' {
+    switch (activityType) {
+      case 'FRANCHISE_CREATED':
+      case 'STORE_CREATED':
+        return 'franchise'
+      case 'USER_REGISTERED':
+        return 'user'
+      case 'ORDER_PLACED':
+      case 'ORDER_COMPLETED':
+        return 'order'
+      case 'PAYMENT_RECEIVED':
+      case 'SUBSCRIPTION_CREATED':
+        return 'revenue'
+      default:
+        return 'user'
+    }
+  }
 
   return (
     <DashboardLayout
@@ -283,26 +327,20 @@ export default function WashlandDashboard() {
             Recent Activity
           </h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-            <ActivityItem
-              title="New franchise added in Bangalore"
-              time="2 hours ago"
-              type="franchise"
-            />
-            <ActivityItem
-              title="Store manager John Doe logged in"
-              time="3 hours ago"
-              type="user"
-            />
-            <ActivityItem
-              title="45 new orders received today"
-              time="5 hours ago"
-              type="order"
-            />
-            <ActivityItem
-              title="Monthly revenue target achieved"
-              time="1 day ago"
-              type="revenue"
-            />
+            {recentActivities.length > 0 ? (
+              recentActivities.map((activity) => (
+                <ActivityItem
+                  key={activity.id}
+                  title={activity.description}
+                  time={formatTimeAgo(new Date(activity.createdAt))}
+                  type={getActivityType(activity.type)}
+                />
+              ))
+            ) : (
+              <p style={{ color: '#6b7280', fontSize: '0.875rem', textAlign: 'center', padding: '1rem' }}>
+                No recent activities
+              </p>
+            )}
           </div>
         </div>
       </div>

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireAdminHybrid } from '@/lib/hybrid-auth'
 import { prisma } from '@/lib/prisma'
 import { OrderStatus, PaymentStatus } from '@prisma/client'
+import { logActivity } from '@/lib/activity-logger'
 
 export async function GET(request: NextRequest) {
   try {
@@ -245,6 +246,22 @@ export async function POST(request: NextRequest) {
               service: true
             }
           }
+        }
+      })
+
+      // Log the order creation activity
+      await logActivity({
+        type: 'ORDER_PLACED',
+        description: `Order ${order.orderNumber} placed for ₹${order.totalAmount}`,
+        userId: order.userId,
+        metadata: {
+          orderId: order.id,
+          orderNumber: order.orderNumber,
+          totalAmount: order.totalAmount,
+          storeId: order.storeId,
+          storeName: order.store.name,
+          franchiseName: order.store.franchise.name,
+          customerName: order.user ? `${order.user.firstName} ${order.user.lastName}` : 'Walk-in Customer'
         }
       })
 
